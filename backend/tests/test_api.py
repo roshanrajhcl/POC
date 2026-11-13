@@ -31,6 +31,29 @@ def test_health_without_key(client):
     assert body["knowledge"]["documents"] >= 15 and body["knowledge"]["retrieval"] == "keyword"
 
 
+def test_cors_allows_pages_origin_and_rejects_other_origins(client):
+    allowed = client.options(
+        "/api/chat",
+        headers={
+            "Origin": "https://poc-dfl.pages.dev",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert allowed.status_code == 200
+    assert allowed.headers["access-control-allow-origin"] == "https://poc-dfl.pages.dev"
+
+    rejected = client.options(
+        "/api/chat",
+        headers={
+            "Origin": "https://untrusted.example",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert rejected.status_code == 400
+    assert "access-control-allow-origin" not in rejected.headers
+
+
 def test_groq_health_reports_keyword_search(monkeypatch, tmp_path):
     settings = Settings(
         ai_provider="groq", groq_api_key="gsk-test", data_dir=tmp_path,

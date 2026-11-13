@@ -1,9 +1,11 @@
 import logging
+import os
 import threading
 from contextlib import asynccontextmanager
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import chat, llm, troubleshoot
 from .cases import build_case
@@ -27,6 +29,18 @@ async def lifespan(_app):
 
 
 app = FastAPI(title="ReportPulse backend", docs_url="/api/docs", openapi_url="/api/openapi.json", lifespan=lifespan)
+cors_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("CORS_ORIGINS", "https://poc-dfl.pages.dev").split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def _unavailable(e: llm.AIUnavailable) -> HTTPException:
