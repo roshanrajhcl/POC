@@ -12,6 +12,9 @@ export default function Composer({ onSubmit, busy, large, prefill, disableAttach
   const [over, setOver] = useState(false)
   const fileRef = useRef(null)
   const areaRef = useRef(null)
+  const canSend = busy
+    ? files.length > 0 && !text.trim()
+    : Boolean(text.trim()) || files.length > 0
 
   useEffect(() => {
     if (!prefill) return
@@ -37,7 +40,7 @@ export default function Composer({ onSubmit, busy, large, prefill, disableAttach
   }
 
   function send() {
-    if (busy || (!text.trim() && !files.length)) return
+    if (!canSend) return
     onSubmit(text.trim(), files)
     setText('')
     setFiles([])
@@ -91,7 +94,7 @@ export default function Composer({ onSubmit, busy, large, prefill, disableAttach
           <button type="button" className="round-btn" onClick={() => fileRef.current?.click()} disabled={disableAttachments} aria-label="Attach files" title={disableAttachments ? 'Clear the selected finding to attach a file' : 'Attach files'}>
             <Icon name="plus" size={20} />
           </button>
-          <button type="button" className="round-btn send" onClick={send} disabled={busy || (!text.trim() && !files.length)} aria-label="Send" title="Send">
+          <button type="button" className="round-btn send" onClick={send} disabled={!canSend} aria-label="Send" title="Send">
             <Icon name="send" size={20} />
           </button>
         </div>

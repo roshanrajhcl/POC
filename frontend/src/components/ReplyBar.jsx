@@ -8,9 +8,10 @@ const FORMS = {
 }
 
 // What the user can do after each answer. The choice goes back to the assistant as the next turn.
-export default function ReplyBar({ data, onFeedback, onAnswers, onWorked, onPrepareFix }) {
+export default function ReplyBar({ data, onFeedback, onAnswers, onWorked }) {
   const [form, setForm] = useState(null)   // worked | cant | different | details
   const [text, setText] = useState('')
+  const [showAccessNotice, setShowAccessNotice] = useState(false)
 
   if (data.status === 'ask') return <Questions questions={data.questions} onSubmit={onAnswers} />
 
@@ -30,13 +31,6 @@ export default function ReplyBar({ data, onFeedback, onAnswers, onWorked, onPrep
 
   return (
     <div className="reply">
-      {data.status === 'suggest' && data.action && !data.action.artifact && (
-        <div className="prepare-offer">
-          <p className="reply-title">Would you like me to prepare this fix for you?</p>
-          <p>I can generate a ready-to-apply snippet or configuration here. You can review it and apply it in Power BI; I cannot change the report directly.</p>
-          <button className="btn primary small" onClick={onPrepareFix}>Prepare it for me</button>
-        </div>
-      )}
       {data.status === 'suggest' && <p className="reply-title">Did this fix it?</p>}
       {data.status === 'escalate' && <p className="reply-title">Learned something new, or fixed it another way?</p>}
       <div className="actions wrap">
@@ -46,10 +40,13 @@ export default function ReplyBar({ data, onFeedback, onAnswers, onWorked, onPrep
             <button className="btn small" onClick={() => onFeedback('still_failing', '', 'Tried it, still failing')}>Still failing</button>
             <button className="btn small" onClick={() => open('cant')}>I can't do this step</button>
             <button className="btn small" onClick={() => open('different')}>Different error now</button>
+            <button className="btn small" onClick={() => setShowAccessNotice(true)}>Do you want me to fix directly?</button>
           </>
         )}
         <button className="btn quiet small" onClick={() => open('details')}>Add details</button>
       </div>
+
+      {showAccessNotice && <p className="artifact-note" role="status">I don't have access to Power BI, so I can't make changes directly.</p>}
 
       {form && (
         <form className="reply-form" onSubmit={submit}>

@@ -51,10 +51,6 @@ export default function Troubleshoot({ issue, dataset, group, requirement, conte
 
   const feedback = (outcome, note, label) => round([...turns, { type: 'feedback', outcome, ...(note && { note }) }], label)
   const answers = (items) => round([...turns, { type: 'answers', items }], items.map((i) => i.answer).join(', '))
-  const prepareFix = () => round([
-    ...turns,
-    { type: 'prepare_fix', text: 'Prepare a ready-to-apply implementation for the current fix. Include the exact artifact and where to apply it. Do not claim to change Power BI.' },
-  ], 'Prepare a ready-to-apply fix')
 
   async function worked(note) {
     setState('loading')
@@ -97,7 +93,7 @@ export default function Troubleshoot({ issue, dataset, group, requirement, conte
           <div className="actions"><button className="btn primary small" onClick={() => retry.current?.()}>Try again</button></div>
         </>
       )}
-      {state === 'ready' && last && <ReplyBar data={last.data} onFeedback={feedback} onAnswers={answers} onWorked={worked} onPrepareFix={prepareFix} />}
+      {state === 'ready' && last && <ReplyBar data={last.data} onFeedback={feedback} onAnswers={answers} onWorked={worked} />}
       {state === 'resolved' && (
         <p className="resolved">Marked as fixed. The case is saved for review. Once approved, the assistant can use it for similar errors.</p>
       )}
